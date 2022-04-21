@@ -4,19 +4,19 @@ go
 
 DECLARE  @TMPTABLE_TERCEROS TABLE
 (
-		   INDICADOR_A VARCHAR (max)  NULL,--1
-		   BPRNUM      VARCHAR (max) NULL,--2
-		   BPRNAM      VARCHAR (max) NULL,--3
-		   BPRSHO      VARCHAR (max) NULL,--4
-		   BPRLOG      VARCHAR (max) NULL,--5
-		   CUR         VARCHAR (max)  NULL,--6
-		   CRY         VARCHAR (max) NULL,--7
-		   LAN         VARCHAR (max) NULL,--8
-		   CRN         VARCHAR (max) NULL,--9
-		   XX12IIBB    VARCHAR (max) NULL,--10
-		   DOCTYP      VARCHAR (max) NULL,--11
-		   XX12DOCNUM  VARCHAR (max) NULL,--12
-		   XX12NIF     VARCHAR (max) NULL,--13
+		   INDICADOR_A     VARCHAR (max) NULL, --1
+		   BPRNUM          VARCHAR (max) NULL, --2
+		   BPRNAM          VARCHAR (max) NULL, --3
+		   BPRSHO          VARCHAR (max) NULL, --4
+		   BPRLOG          VARCHAR (max) NULL, --5
+		   CUR             VARCHAR (max) NULL, --6
+		   CRY             VARCHAR (max) NULL, --7
+		   LAN             VARCHAR (max) NULL, --8
+		   CRN             VARCHAR (max) NULL, --9
+		   XX12IIBB        VARCHAR (max) NULL, --10
+		   DOCTYP          VARCHAR (max) NULL, --11
+		   XX12DOCNUM      VARCHAR (max) NULL, --12
+		   XX12NIF         VARCHAR (max) NULL, --13
 
 		   INDICADOR_B     VARCHAR (max) NULL,--14
 		   BPAADD          VARCHAR (max) NULL,--15
@@ -30,14 +30,14 @@ DECLARE  @TMPTABLE_TERCEROS TABLE
 		   B_CRY           VARCHAR (max) NULL,--23
 		   TEL             VARCHAR (max) NULL,--24
 		   FAX             VARCHAR (max) NULL,--25
-		   BPAADDFLG       VARCHAR (max)  NULL,--26
+		   BPAADDFLG       VARCHAR (max) NULL,--26
 
 
-		   INDICADOR_R     VARCHAR (max) NULL,--27
+		 /*INDICADOR_R     VARCHAR (max) NULL,--27
 		   R_CRY           VARCHAR (max) NULL,--28
 		   BIDNUM          VARCHAR (max) NULL,--29
 		   PAB1            VARCHAR (max) NULL,--30
-		   R_BPAADD        VARCHAR (max) NULL,--31
+		   R_BPAADD        VARCHAR (max) NULL,--31*/
 
 
 		   INDICADOR_C     VARCHAR (max) NULL,--32
@@ -45,10 +45,10 @@ DECLARE  @TMPTABLE_TERCEROS TABLE
 		   CNTTTL          VARCHAR (max) NULL,--34
 		   CNTFNA          VARCHAR (max) NULL,--35
 		   CNTLNA          VARCHAR (max) NULL,--36
-		   C_TEL           VARCHAR (max) NULL,--37
+		   --C_TEL           VARCHAR (max) NULL,--37
 		   CNTFNC          VARCHAR (max) NULL,--38
 		   C_FAX           VARCHAR (max) NULL,--39
-		   WEB             VARCHAR (max) NULL--40
+		   WEB             VARCHAR (max) NULL --40
 		   
  )
 
@@ -56,13 +56,13 @@ DECLARE  @TMPTABLE_TERCEROS TABLE
 
  select DISTINCT 
 
-			'A'                 as 'INDICADOR_A',
-			c.CL_CODIGO         as 'BPRNUM',  --Código de tercero
-			c.CL_NOMBRE         as 'BPRNAM',  --Razón social (Verficar que sea la misma que el nombre)
-			''                  as 'BPRSHO',  --Descripción corta --Verifar 
-			c.CL_CODIGO         as 'BPRLOG', --Sigla
-			'ARS'               as 'CUR',-- Divisa
-			 (SELECT CASE UPPER(prov.PO_DESCRI) --País
+			'B'                 as 'INDICADOR_B',
+			LEFT(c.CL_CODIGO,15)as 'BPRNUM',            --Código de tercero
+			LEFT(c.CL_NOMBRE,35)as 'BPRNAM',            --Razón social (Verficar que sea la misma que el nombre)
+			LEFT(c.CL_NOMBRE,10)as 'BPRSHO',            --Descripción corta --Verifar 
+			LEFT(c.CL_CODIGO,10)as 'BPRLOG',            --Sigla
+			LEFT('ARS',3)       as 'CUR',               -- Divisa
+			(SELECT CASE UPPER(LEFT (prov.PO_DESCRI,3))         --País
 							--LISTADO PAISES
 							WHEN 'BOLIVIA' THEN 'BO'
 							WHEN 'BRASIL' THEN 'BR'
@@ -81,63 +81,94 @@ DECLARE  @TMPTABLE_TERCEROS TABLE
 							WHEN 'UCRANIA' THEN 'UA'
 							WHEN 'URUGUAY' THEN 'UY'
 							WHEN 'VENEZUELA' THEN 'VE'
-			
-				
-								
-						END) 
-				   AS 'CRY',
+		                    Else '' 
+							END) AS 'CRY',
 	   
-			'SPA'	            as 'LAN', --Idioma
+			LEFT('SPA',3)	     AS 'LAN',                   --Idioma
 
-			(CASE C.CL_CUIT              --N.I.F
-						WHEN '' THEN 'A DEFINIR'
+			(CASE LEFT(C.CL_CUIT,20)                                  --N.I.F
+						WHEN '' THEN ''
 						ELSE C.CL_CUIT
 					END)
 				   AS 'CRN',
 	   
-			c.CL_IBR            as 'XX12IIBB',--Nro.Ing.Brutos
-			c.CL_TIPDOC         as 'DOCTYP',--Tipo de documento 
-			SUBSTRING(c.CL_CUIT,3,8)  as 'XX12DOCNUM',--Nro.documento
-			c.CL_CUIT           as 'XX12NIF',--Nro.Cuit
+			LEFT(c.CL_IBR,15)         as 'XX12IIBB',          --Nro.Ing.Brutos
+			LEFT(c.CL_TIPDOC,20)      as 'DOCTYP',            --Tipo de documento 
+			SUBSTRING(c.CL_CUIT,3,8)  as 'XX12DOCNUM',        --Nro.documento
+			LEFT(c.CL_CUIT,11)        as 'XX12NIF',           --Nro.Cuit
+
+            'A'                       as 'INDICADOR_A',
+		    'PRI'                     as 'BPAADD',           --Dirección
+			'PRINCIPAL'               as 'BPADES',           --Descripción
+			LEFT(c.CL_DIRECC,50)      as '[BPAADDLIG(0)]',   --Línea de dirección
+			''                        as '[BPAADDLIG(1)]',   --Línea de dirección
+			''                        as '[BPAADDLIG(2)]',   --Línea de dirección
+			left(c.CL_CODPOS,10)      as 'POSCOD',           --Código postal 
 
 
-			'B'                  as 'INDICADOR_B',
-			C.CL_DIRECC         as 'BPAADD',--Dirección
-			''                  as 'BPADES',        --Descripción
-			''                  as '[BPAADDLIG(0)]',   --Línea de dirección
-			''                  as '[BPAADDLIG(1)]',   --Línea de dirección
-			''                  as '[BPAADDLIG(2)]',   --Línea de dirección
-			c.CL_CODPOS         as 'POSCOD',         --Código postal 
+			CASE UPPER (LEFT (prov.PO_DESCRI,35))            --Provincia
+			WHEN 'FORMOSA' THEN 'FMA'
+			WHEN 'JUJUY' THEN 'JJY'
+			WHEN 'LA PAMPA' THEN 'LPA'
+			WHEN 'LA RIOJA' THEN 'LRJ'
+			WHEN 'MENDOZA' THEN 'MDZ'
+			WHEN 'MISIONES' THEN 'MIS'
+			WHEN 'NEUQUEN' THEN 'NQN'
+			WHEN 'RIO NEGRO' THEN 'RNG'
+			WHEN 'BUENOS AIRES' THEN 'BUE'
+			WHEN 'CAPITAL FEDERAL' THEN 'CFE'
+			WHEN 'CATAMARCA' THEN 'CTC'
+			WHEN 'CHACO' THEN 'CHA'
+			WHEN 'CHUBUT' THEN 'CHU'
+			WHEN 'CORDOBA' THEN 'CBA'
+			WHEN 'CORRIENTES' THEN 'COR'
+			WHEN 'ENTRE RIOS' THEN 'ERI'
+			WHEN 'SALTA' THEN 'SLA'
+			WHEN 'SAN JUAN' THEN 'SJN'
+			WHEN 'SAN LUIS' THEN 'SLS'
+			WHEN 'SANTA CRUZ' THEN 'SCZ'
+			WHEN 'SANTA FE' THEN 'SFE'
+			WHEN 'SANTIAGO DEL ESTERO' THEN 'SDE'
+			WHEN 'TUCUMAN' THEN 'TUC'
+			WHEN 'TIERRA DEL FUEGO' THEN 'TDF'
+			ELSE ''
+			END AS 'SAT',
 
+			LEFT(c.CL_LOCALI,40)        as 'CTY',                   --Ciudad
 
-			 CASE UPPER(prov.PO_DESCRI)       ---Provincia
-			WHEN 'FORMOSA' THEN 'AR'
-							WHEN 'JUJUY' THEN 'AR'
-							WHEN 'LA PAMPA' THEN 'AR'
-							WHEN 'LA RIOJA' THEN 'AR'
-							WHEN 'MENDOZA' THEN 'AR'
-							WHEN 'MISIONES' THEN 'AR'
-							WHEN 'NEUQUEN' THEN 'AR'
-							WHEN 'RIO NEGRO' THEN 'AR'
-							WHEN 'BUENOS AIRES' THEN 'AR'
-							WHEN 'CAPITAL FEDERAL' THEN 'AR'
-							WHEN 'CATAMARCA' THEN 'AR'
-							WHEN 'CHACO' THEN 'AR'
-							WHEN 'CHUBUT' THEN 'AR'
-							WHEN 'CORDOBA' THEN 'AR'
-							WHEN 'CORRIENTES' THEN 'AR'
-							WHEN 'ENTRE RIOS' THEN 'AR'
-							WHEN 'SALTA' THEN 'AR'
-							WHEN 'SAN JUAN' THEN 'AR'
-							WHEN 'SAN LUIS' THEN 'AR'
-							WHEN 'SANTA CRUZ' THEN 'AR'
-							WHEN 'SANTA FE' THEN 'AR'
-							WHEN 'SANTIAGO DEL ESTERO' THEN 'AR'
-							WHEN 'TUCUMAN' THEN 'AR' end as 'SAT',
+			(SELECT CASE UPPER (LEFT(prov.PO_DESCRI,10))              --País
+							
+							WHEN 'BOLIVIA' THEN 'BO'
+							WHEN 'BRASIL' THEN 'BR'
+							WHEN 'ARGENTINA' THEN 'AR'
+							WHEN 'CHILE' THEN 'CL'
+							WHEN 'COLOMBIA' THEN 'CO'
+							WHEN 'ECUADOR' THEN 'EC'
+							WHEN 'ESTADOS UNIDOS' THEN 'US'
+							WHEN 'GUATEMALA' THEN 'GT'
+							WHEN 'ITALIA' THEN 'IT'
+							WHEN 'MEXICO' THEN 'MX'
+							WHEN 'PANAMA' THEN 'PA'
+							WHEN 'PARAGUAY' THEN 'PY'
+							WHEN 'PERU' THEN 'PE'
+							WHEN 'SUIZA' THEN 'SZ'
+							WHEN 'UCRANIA' THEN 'UA'
+							WHEN 'URUGUAY' THEN 'UY'
+							WHEN 'VENEZUELA' THEN 'VE'
+			               else ''
+			               END)   AS 'B_CRY' ,
+				 
 
-			c.CL_LOCALI         as 'CTY',  --Ciudad
-
-			(SELECT CASE UPPER(prov.PO_DESCRI)  --País
+			/*(select stuff ((select ' / ' + clientesContactos.CLC_TELEFO 
+			from CLIENTES_CONTACTO clientesContactos 
+			where clientesContactos.CL_CODIGO = c.CL_CODIGO
+			for xml path('')), 1,1,''))	*/
+							
+			LEFT('',20)		     as 'TEL',
+		    LEFT('',20)          as 'FAX',                   --Fax
+			'2'                  as 'BPAADDFLG',             --Por defecto 
+           /* 'R'                  as 'INDICADOR_R',
+			(SELECT CASE UPPER(LEFT(prov.PO_DESCRI,10))               --País
 							--LISTADO PAISES
 							WHEN 'BOLIVIA' THEN 'BO'
 							WHEN 'BRASIL' THEN 'BR'
@@ -156,55 +187,24 @@ DECLARE  @TMPTABLE_TERCEROS TABLE
 							WHEN 'UCRANIA' THEN 'UA'
 							WHEN 'URUGUAY' THEN 'UY'
 							WHEN 'VENEZUELA' THEN 'VE'
-			
-				
-									
-						END) 
-				   AS 'B_CRY' ,
+			                ELSE ''
+							END) AS 'R_CRY' ,
 
-			cc.CLC_TELEFO       as 'TEL',  --Teléfono 
-			''                  as 'FAX',  --Fax
-			'2'                 as 'BPAADDFLG', --Por defecto 
+			LEFT('',30)         as 'BIDNUM',                     --Consultar que es 
+			LEFT('',35)         as 'PAB1',                       --Domiciliación ¿?
+			LEFT(c.CL_DIRECC,5) as 'R_BPAADD',                   --Dirección*/
 
 
+			'C'                 as 'INDICADOR_C',
+			LEFT('',15)         as 'CCNCRM',                      --Código de contrato
+			'SEÑOR'             as 'CNTTTL',                      --Trato
+	   	  
+		  
+		  PARSENAME(REPLACE((LEFT(CLC_NOMBRE,20)),' ','.'),2) AS CNTFNA,    --Nombre 
+          PARSENAME(REPLACE((LEFT(CLC_NOMBRE,35)),' ','.'),1) AS CNTLNA,    --Apellidos
+	  --  LEFT(cc.CLC_TELEFO,20)	AS 'C_TEL', 
 
-			'R'                  as 'INDICADOR_R',
-			(SELECT CASE UPPER(prov.PO_DESCRI)  --País
-							--LISTADO PAISES
-							WHEN 'BOLIVIA' THEN 'BO'
-							WHEN 'BRASIL' THEN 'BR'
-							WHEN 'ARGENTINA' THEN 'AR'
-							WHEN 'CHILE' THEN 'CL'
-							WHEN 'COLOMBIA' THEN 'CO'
-							WHEN 'ECUADOR' THEN 'EC'
-							WHEN 'ESTADOS UNIDOS' THEN 'US'
-							WHEN 'GUATEMALA' THEN 'GT'
-							WHEN 'ITALIA' THEN 'IT'
-							WHEN 'MEXICO' THEN 'MX'
-							WHEN 'PANAMA' THEN 'PA'
-							WHEN 'PARAGUAY' THEN 'PY'
-							WHEN 'PERU' THEN 'PE'
-							WHEN 'SUIZA' THEN 'SZ'
-							WHEN 'UCRANIA' THEN 'UA'
-							WHEN 'URUGUAY' THEN 'UY'
-							WHEN 'VENEZUELA' THEN 'VE'
-			
-				
-									
-						END) 
-				   AS 'R_CRY' ,
-			''                  as 'BIDNUM', ---Consultar que es 
-			''                  as 'PAB1',  --Domiciliación ¿?
-			c.CL_DIRECC         as 'R_BPAADD', --Dirección
-
-
-			'C'                  as 'INDICADOR_C',
-			''                  as 'CCNCRM', --Código de contrato
-			'SEÑOR'             as 'CNTTTL',  --Trato
-			PARSENAME(REPLACE(CLC_NOMBRE,' ','.'),2) AS 'CNTFNA',    --Nombre 
-			PARSENAME(REPLACE(CLC_NOMBRE,' ','.'),1) AS 'CNTLNA',    --Apellidos 
-			cc.CLC_TELEFO       as 'C_TEL' ,      --Teléfono
-			 CASE (CC.CLC_TIPO)         --Función
+			 CASE (CC.CLC_TIPO)                                   --Función
 				   WHEN  'Gerente de Compras' THEN '4'
 				   WHEN  'Gerente de Ventas'  THEN '2'
 				   WHEN  'Gerente de General' THEN '1'
@@ -226,10 +226,9 @@ DECLARE  @TMPTABLE_TERCEROS TABLE
 				   WHEN  'Tesorería '         THEN '7'  
 				   WHEN  'Banco Patagonia '   THEN '11'
 				   WHEN  'Finanzas '          THEN '7'
-	        
-						END AS 'CNTFNC',
-			''              as 'C_FAX',       --Fax
-			cc.CLC_EMAIL    as 'WEB'        --E-mail
+	               END AS 'CNTFNC',
+			LEFT('',20)              as 'C_FAX',                             --Fax
+			LEFT(cc.CLC_EMAIL,80)    as 'WEB'                                --E-mail
 
   from CLIENTES c
   LEFT JOIN CLIENTES_CONTACTO cc 
@@ -387,18 +386,17 @@ DECLARE  @TMPTABLE_TERCEROS TABLE
 		CodCliente VARCHAR(max) NOT NULL,
 		Sigla VARCHAR(max) NOT NULL
 		)
-
-
-	INSERT INTO @TMTABLE_CUSTOMER VALUES ('20001','00102')
-	INSERT INTO @TMTABLE_CUSTOMER VALUES ('20002','00104')
-	INSERT INTO @TMTABLE_CUSTOMER VALUES ('20003','00107')
-	INSERT INTO @TMTABLE_CUSTOMER VALUES ('30001','07024')
-	INSERT INTO @TMTABLE_CUSTOMER VALUES ('30002','07046')
-	INSERT INTO @TMTABLE_CUSTOMER VALUES ('30003','07051')
-	INSERT INTO @TMTABLE_CUSTOMER VALUES ('40001','07002')
-	INSERT INTO @TMTABLE_CUSTOMER VALUES ('40002','07010')
-	INSERT INTO @TMTABLE_CUSTOMER VALUES ('40003','07015')
-	INSERT INTO @TMTABLE_CUSTOMER VALUES ('40004','07032')
+	
+	INSERT INTO @TMTABLE_CUSTOMER VALUES ('020001','00102')
+	INSERT INTO @TMTABLE_CUSTOMER VALUES ('020002','00104')
+	INSERT INTO @TMTABLE_CUSTOMER VALUES ('020003','00107')
+	INSERT INTO @TMTABLE_CUSTOMER VALUES ('030001','07024')
+	INSERT INTO @TMTABLE_CUSTOMER VALUES ('030002','07046')
+	INSERT INTO @TMTABLE_CUSTOMER VALUES ('030003','07051')
+	INSERT INTO @TMTABLE_CUSTOMER VALUES ('040001','07002')
+	INSERT INTO @TMTABLE_CUSTOMER VALUES ('040002','07010')
+	INSERT INTO @TMTABLE_CUSTOMER VALUES ('040003','07015')
+	INSERT INTO @TMTABLE_CUSTOMER VALUES ('040004','07032')
 	INSERT INTO @TMTABLE_CUSTOMER VALUES ('100001','00009')
 	INSERT INTO @TMTABLE_CUSTOMER VALUES ('100002','00010')
 	INSERT INTO @TMTABLE_CUSTOMER VALUES ('100003','00011')
@@ -473,7 +471,7 @@ if OBJECT_ID('tempdb..##TMPGRID') IS NOT NULL
 
 		INSERT INTO ##TMPGRID
 			SELECT distinct 
-			      TT.INDICADOR_A,TT.BPRNUM,TT.BPRNAM,TT.BPRSHO,TT.BPRLOG,TT.CUR,TT.CRY,TT.LAN,TT.CRN,TT.XX12IIBB,TT.DOCTYP,TT.XX12DOCNUM,TT.XX12NIF
+			      TT.INDICADOR_A,TC.CodCliente,TT.BPRNAM,TT.BPRSHO,TT.BPRLOG,TT.CUR,TT.CRY,TT.LAN,TT.CRN,TT.XX12IIBB,TT.DOCTYP,TT.XX12DOCNUM,TT.XX12NIF
             FROM @TMPTABLE_TERCEROS AS TT, @TMTABLE_CUSTOMER AS TC
 			WHERE TT.BPRNUM=TC.Sigla and TC.CodCliente=@CodCliente
 
@@ -486,15 +484,15 @@ if OBJECT_ID('tempdb..##TMPGRID') IS NOT NULL
 		    WHERE TT.BPRNUM=TC.Sigla and TC.CodCliente=@CodCliente
 
 
-			INSERT INTO ##TMPGRID
+			/*INSERT INTO ##TMPGRID
 			SELECT distinct 
 			     TT.INDICADOR_R,TT.R_CRY,TT.BIDNUM,TT.PAB1,TT.BPAADD,'','','','','','','',''
 			FROM @TMPTABLE_TERCEROS AS  TT,@TMTABLE_CUSTOMER  AS TC
-            WHERE TT.BPRNUM=TC.Sigla and TC.CodCliente=@CodCliente
+            WHERE TT.BPRNUM=TC.Sigla and TC.CodCliente=@CodCliente*/
 
 			INSERT INTO ##TMPGRID
 			SELECT distinct 
-			    TT.INDICADOR_C,TT.CCNCRM,TT.CNTTTL,TT.CNTFNA,TT.CNTLNA,TT.C_TEL,TT.CNTFNC,TT.C_FAX,TT.WEB,'','','',''
+			    TT.INDICADOR_C,TT.CCNCRM,TT.CNTTTL,TT.CNTFNA,TT.CNTLNA,TT.CNTFNC,TT.C_FAX,TT.WEB,'','','','',''
 			FROM @TMPTABLE_TERCEROS AS  TT,@TMTABLE_CUSTOMER  AS TC
 			WHERE TT.BPRNUM=TC.Sigla and TC.CodCliente=@CodCliente
 			
@@ -506,5 +504,7 @@ if OBJECT_ID('tempdb..##TMPGRID') IS NOT NULL
 
 	DEALLOCATE TERCEROS
 	
-	SELECT tmpGrid.*
-FROM ##TMPGRID tmpGrid
+	SELECT tmpGrid.Dato1,ISNULL(tmpGrid.Dato2,''),ISNULL(tmpGrid.Dato3,''),ISNULL(tmpGrid.Dato4,'SD'),ISNULL(tmpGrid.Dato5,'SD'),
+	ISNULL(tmpGrid.Dato6,''),ISNULL(tmpGrid.Dato7,''),ISNULL(tmpGrid.Dato8,''),ISNULL(tmpGrid.Dato9,''),ISNULL(tmpGrid.Dato10,''),
+	ISNULL(tmpGrid.Dato11,''),ISNULL(tmpGrid.Dato12,''),ISNULL(tmpGrid.Dato13,''),ISNULL(tmpGrid.Dato13,'')
+    FROM ##TMPGRID tmpGrid
