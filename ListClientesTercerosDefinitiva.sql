@@ -2,6 +2,7 @@ use Venturi
 go
 
 
+
 DECLARE  @TMPTABLE_TERCEROS TABLE
 (
 		   INDICADOR_A     VARCHAR (max) NULL, --1
@@ -53,16 +54,16 @@ DECLARE  @TMPTABLE_TERCEROS TABLE
  )
 
  INSERT INTO @TMPTABLE_TERCEROS
-
- select DISTINCT 
+ 
+ select 
 
 			'B'                 as 'INDICADOR_B',
-			LEFT(c.CL_CODIGO,15)as 'BPRNUM',            --Código de tercero
-			LEFT(c.CL_NOMBRE,35)as 'BPRNAM',            --Razón social (Verficar que sea la misma que el nombre)
-			LEFT(c.CL_NOMBRE,10)as 'BPRSHO',            --Descripción corta --Verifar 
-			LEFT(c.CL_CODIGO,10)as 'BPRLOG',            --Sigla
-			LEFT('ARS',3)       as 'CUR',               -- Divisa
-			(SELECT CASE UPPER(LEFT (prov.PO_DESCRI,3))         --País
+			LEFT(c.CL_CODIGO,15)as 'BPRNUM',					--Código de tercero
+			LEFT(c.CL_NOMBRE,35)as 'BPRNAM',					--Razón social (Verficar que sea la misma que el nombre)
+			LEFT(c.CL_NOMBRE,10)as 'BPRSHO',					--Descripción corta --Verifar 
+			LEFT(c.CL_CODIGO,10)as 'BPRLOG',					--Sigla
+			LEFT('ARS',3)       as 'CUR',						--Divisa
+			(SELECT CASE UPPER(LEFT (prov.PO_DESCRI,3))			--País
 							--LISTADO PAISES
 							WHEN 'BOLIVIA' THEN 'BO'
 							WHEN 'BRASIL' THEN 'BR'
@@ -81,16 +82,15 @@ DECLARE  @TMPTABLE_TERCEROS TABLE
 							WHEN 'UCRANIA' THEN 'UA'
 							WHEN 'URUGUAY' THEN 'UY'
 							WHEN 'VENEZUELA' THEN 'VE'
-		                    Else '' 
+		                  
 							END) AS 'CRY',
 	   
 			LEFT('SPA',3)	     AS 'LAN',                   --Idioma
 
-			(CASE LEFT(C.CL_CUIT,20)                                  --N.I.F
-						WHEN '' THEN ''
-						ELSE C.CL_CUIT
-					END)
-				   AS 'CRN',
+			(CASE LEFT(C.CL_CUIT,20)                         --N.I.F
+				  WHEN '' THEN ''
+				  ELSE C.CL_CUIT
+			 END) AS 'CRN',
 	   
 			LEFT(c.CL_IBR,15)         as 'XX12IIBB',          --Nro.Ing.Brutos
 			LEFT(c.CL_TIPDOC,20)      as 'DOCTYP',            --Tipo de documento 
@@ -98,12 +98,32 @@ DECLARE  @TMPTABLE_TERCEROS TABLE
 			LEFT(c.CL_CUIT,11)        as 'XX12NIF',           --Nro.Cuit
 
             'A'                       as 'INDICADOR_A',
-		    'PRI'                     as 'BPAADD',           --Dirección
-			'PRINCIPAL'               as 'BPADES',           --Descripción
-			LEFT(c.CL_DIRECC,50)      as '[BPAADDLIG(0)]',   --Línea de dirección
-			''                        as '[BPAADDLIG(1)]',   --Línea de dirección
-			''                        as '[BPAADDLIG(2)]',   --Línea de dirección
-			left(c.CL_CODPOS,10)      as 'POSCOD',           --Código postal 
+		    'PRI'                     as 'BPAADD',            --Dirección
+			'PRINCIPAL'               as 'BPADES',            --Descripción
+			 CASE UPPER (LEFT (prov.PO_DESCRI,35))            --Provincia
+			
+							WHEN 'BOLIVIA' THEN 'BO'
+							WHEN 'BRASIL' THEN 'BR'
+							WHEN 'ARGENTINA' THEN 'AR'
+							WHEN 'CHILE' THEN 'CL'
+							WHEN 'COLOMBIA' THEN 'CO'
+							WHEN 'ECUADOR' THEN 'EC'
+							WHEN 'ESTADOS UNIDOS' THEN 'US'
+							WHEN 'GUATEMALA' THEN 'GT'
+							WHEN 'ITALIA' THEN 'IT'
+							WHEN 'MEXICO' THEN 'MX'
+							WHEN 'PANAMA' THEN 'PA'
+							WHEN 'PARAGUAY' THEN 'PY'
+							WHEN 'PERU' THEN 'PE'
+							WHEN 'SUIZA' THEN 'SZ'
+							WHEN 'UCRANIA' THEN 'UA'
+							WHEN 'URUGUAY' THEN 'UY'
+							WHEN 'VENEZUELA' THEN 'VE'
+			               ELSE 'AR' end  as '[BPAADDLIG(0)]',   --Línea de dirección
+			
+			LEFT(c.CL_DIRECC,50)          as '[BPAADDLIG(1)]',   --Línea de dirección
+			''                            as '[BPAADDLIG(2)]',   --Línea de dirección
+			LEFT(c.CL_CODPOS,10)          as 'POSCOD',           --Código postal 
 
 
 			CASE UPPER (LEFT (prov.PO_DESCRI,35))            --Provincia
@@ -134,7 +154,7 @@ DECLARE  @TMPTABLE_TERCEROS TABLE
 			ELSE ''
 			END AS 'SAT',
 
-			LEFT(c.CL_LOCALI,40)        as 'CTY',                   --Ciudad
+			LEFT(c.CL_LOCALI,40)        as 'CTY',                     --Ciudad
 
 			(SELECT CASE UPPER (LEFT(prov.PO_DESCRI,10))              --País
 							
@@ -155,7 +175,7 @@ DECLARE  @TMPTABLE_TERCEROS TABLE
 							WHEN 'UCRANIA' THEN 'UA'
 							WHEN 'URUGUAY' THEN 'UY'
 							WHEN 'VENEZUELA' THEN 'VE'
-			               else ''
+			               
 			               END)   AS 'B_CRY' ,
 				 
 
@@ -165,7 +185,7 @@ DECLARE  @TMPTABLE_TERCEROS TABLE
 		    LEFT('',20)          as 'FAX',                   --Fax
 			'2'                  as 'BPAADDFLG',             --Por defecto 
            /* 'R'                  as 'INDICADOR_R',
-			(SELECT CASE UPPER(LEFT(prov.PO_DESCRI,10))               --País
+			(SELECT CASE UPPER(LEFT(prov.PO_DESCRI,10))      --País
 							--LISTADO PAISES
 							WHEN 'BOLIVIA' THEN 'BO'
 							WHEN 'BRASIL' THEN 'BR'
@@ -186,15 +206,14 @@ DECLARE  @TMPTABLE_TERCEROS TABLE
 							WHEN 'VENEZUELA' THEN 'VE'
 			                ELSE ''
 							END) AS 'R_CRY' ,
-
 			LEFT('',30)         as 'BIDNUM',                     --Consultar que es 
 			LEFT('',35)         as 'PAB1',                       --Domiciliación ¿?
 			LEFT(c.CL_DIRECC,5) as 'R_BPAADD',                   --Dirección*/
 
-
-			'C'                 as 'INDICADOR_C',
-			LEFT('',15)         as 'CCNCRM',                      --Código de contrato
-			'SEÑOR'             as 'CNTTTL',                      --Trato
+			
+		  'C'                 as 'INDICADOR_C',
+		  RIGHT(100000 + Row_number () Over(order by (select C.CL_CODIGO)ASC),5) AS 'CCNCRM',   --Código de contrato//se agrego un código de contacto 
+		  'SEÑOR'             as 'CNTTTL',                                    --Trato
 	   	  PARSENAME( REPLACE((LEFT(CLC_NOMBRE,20)),' ','.'),2) AS CNTFNA,    --Nombre 
           PARSENAME( REPLACE((LEFT(CLC_NOMBRE,35)),' ','.'),1) AS CNTLNA,    --Apellidos
 		--LEFT(cc.CLC_TELEFO,20)	AS 'C_TEL', 
@@ -230,17 +249,9 @@ DECLARE  @TMPTABLE_TERCEROS TABLE
   on c.CL_CODIGO=cc.CL_CODIGO
   LEFT JOIN [Venturi].[dbo].PROVINCIA prov
   ON c.PO_CODIGO = prov.PO_CODIGO
-  WHERE C.CL_CODPOS!=''
+  where c.CL_CODPOS!=''
  
-		/*DECLARE @TMTABLE_CUSTOMER TABLE
-		(
-		CodCliente VARCHAR(max) NOT NULL,
-		Sigla VARCHAR(max) NOT NULL
-		)
-
-		*/
-	--INSERT INTO @TMTABLE_CUSTOMER select * from Venturi..lct
-
+	
 	
 if OBJECT_ID('tempdb..##TMPGRID') IS NOT NULL
 	   DROP TABLE ##TMPGRID
@@ -260,6 +271,7 @@ if OBJECT_ID('tempdb..##TMPGRID') IS NOT NULL
 		Dato11 NVARCHAR(MAX) NULL,
 		Dato12 NVARCHAR(MAX) NULL,
 		Dato13 NVARCHAR(MAX) NULL
+		
 		
 		
 	)	
@@ -284,7 +296,7 @@ if OBJECT_ID('tempdb..##TMPGRID') IS NOT NULL
 
 		INSERT INTO ##TMPGRID
 			SELECT distinct 
-			      TT.INDICADOR_A,TC.dat1,TT.BPRNAM,TT.BPRSHO,TT.BPRLOG,TT.CUR,TT.CRY,TT.LAN,TT.CRN,TT.XX12IIBB,TT.DOCTYP,TT.XX12DOCNUM,TT.XX12NIF
+			      TT.INDICADOR_A,TC.dat1,TT.BPRNAM,TT.BPRSHO,TT.BPRLOG,TT.CUR,'AR',TT.LAN,TT.CRN,TT.XX12IIBB,TT.DOCTYP,TT.XX12DOCNUM,TT.XX12NIF
             FROM @TMPTABLE_TERCEROS AS TT 
 			INNER JOIN  Venturi..lct  TC 
 			ON TT.BPRNUM=TC.dat2 and TC.dat1=@CodCliente
@@ -308,7 +320,7 @@ if OBJECT_ID('tempdb..##TMPGRID') IS NOT NULL
 
 			INSERT INTO ##TMPGRID
 			SELECT distinct 
-			    TT.INDICADOR_C,TT.CCNCRM,TT.CNTTTL,TT.CNTFNA,TT.CNTLNA,TT.CNTFNC,TT.C_FAX,TT.WEB,'','','','',''
+			    TT.INDICADOR_C,TT.CCNCRM,TT.CNTTTL,'',TT.CNTFNC,TT.C_FAX,TT.WEB,'','','','','',''
 			FROM @TMPTABLE_TERCEROS AS  TT
 			INNER JOIN  Venturi..lct  TC ON 
 			TT.BPRNUM=TC.dat2 and TC.dat1=@CodCliente
